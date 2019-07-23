@@ -7,23 +7,23 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import pdfboxdemo.WordCordinates;
+import pdfboxdemo.CharacterCordinates;
 
 public class WordCordinatesTest {
 	
-	private WordCordinates wordCordinates;
+	private CharacterCordinates characterCordinates;
 	private String inputPath="src/test/resources/pdfFiles/demoAddingText.pdf";
 	
 	@Test
 	public void cordinateTest() {
 		try {
-			wordCordinates=new WordCordinates();
+			characterCordinates=new CharacterCordinates();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		File inputFile=new File(inputPath);
-		wordCordinates.CharacterCordinates(inputFile);
+		characterCordinates.CharacterCordinates(inputFile);
 		assertTrue("Characters Not Found",true);
 	}
 	
