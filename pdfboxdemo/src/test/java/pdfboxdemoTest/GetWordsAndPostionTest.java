@@ -16,7 +16,7 @@ public class GetWordsAndPostionTest {
 	File inputFile;
 	PDDocument document;
 	private GetWordsAndPositions wordCordinates;
-	private String inputPath="src/test/resources/pdfFiles/DownloadBlob.pdf";
+	private String inputPath="src/test/resources/pdfFiles/demoAddingText.pdf";
 			///demoAddingText.pdf";
 	
 	@Test

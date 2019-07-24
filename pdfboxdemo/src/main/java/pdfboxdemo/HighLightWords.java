@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
@@ -19,16 +20,18 @@ import org.apache.pdfbox.text.TextPosition;
 
 public class HighLightWords extends PDFTextStripper{
 
+	Logger mylogger=Logger.getLogger(this.getClass().getName());
+	
 	public HighLightWords() throws IOException {
 		super();
 		
 	}
 
-	public static void main(String[] args) throws InvalidPasswordException, IOException {
-		 PDDocument document = null;
-	        String fileName = "src/test/resources/pdfFiles/demoAddingText.pdf";
-	        try {
-	            document = PDDocument.load( new File(fileName) );
+
+		public void HighLightWordsCordinates(File fileName) throws InvalidPasswordException, IOException {
+		PDDocument document=null;
+				
+	  			document = PDDocument.load(fileName);
 	            PDFTextStripper stripper = new HighLightWords();
 	            stripper.setSortByPosition( true );
 
@@ -38,14 +41,11 @@ public class HighLightWords extends PDFTextStripper{
 	            Writer dummy = new OutputStreamWriter(new ByteArrayOutputStream());
 	            stripper.writeText(document, dummy);
 
-	            File file1 = new File("src/test/resources/pdfFiles/AnyPDFFileNew.pdf");
+	            File file1 = new File("src/test/resources/pdfFiles/HighLightWord.pdf");
 	            document.save(file1);
-	        }
-	        finally {
-	            if( document != null ) {
-	                document.close();
-	            }
-	        }
+	            document.close();
+	            
+	        
 	    }
 
 	    /**
@@ -62,7 +62,7 @@ public class HighLightWords extends PDFTextStripper{
 	              width     = 0, 
 	              height    = 0, 
 	              fontHeight = 0;	   
-	        String[] criteria = {"Hello"};
+	        String[] criteria = {" "};
 
 	        for (int i = 0; i < criteria.length; i++) {
 	            if (string.contains(criteria[i])) {
@@ -77,7 +77,7 @@ public class HighLightWords extends PDFTextStripper{
 	            width    = textPositions.get(0).getWidthDirAdj();
 	            height   = textPositions.get(0).getHeightDir();
 
-	            System.out.println(string + "X-Init = " + posXInit + "; Y-Init = " + posYInit + "; X-End = " + posXEnd + "; Y-End = " + posYEnd + "; Font-Height = " + fontHeight);
+	            mylogger.info(string + "X-Init = " + posXInit + "; Y-Init = " + posYInit + "; X-End = " + posXEnd + "; Y-End = " + posYEnd + "; Font-Height = " + fontHeight);
 
 	            /* numeration is index-based. Starts from 0 */
 

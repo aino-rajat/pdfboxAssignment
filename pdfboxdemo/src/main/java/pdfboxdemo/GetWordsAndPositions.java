@@ -78,15 +78,7 @@ public class GetWordsAndPositions extends PDFTextStripper{
              {
                  stripper.stripPage(page);
              }
-//			stripper.setStartPage( 0 );
-//			stripper.setEndPage( document.getNumberOfPages() );
-//			Writer dummy = new OutputStreamWriter(new ByteArrayOutputStream());
-//			stripper.writeText(document, dummy);
-//
-//			// print words
-//			for(String word:words){
-//				mylogger.info(word); 
-//			}
+
 			return true;
 			
 		}
@@ -96,10 +88,7 @@ public class GetWordsAndPositions extends PDFTextStripper{
     {
         super.showGlyph(textRenderingMatrix, font, code, unicode, displacement);
 
-        // in cyan:
-        // show actual glyph bounds. This must be done here and not in writeString(),
-        // because writeString processes only the glyphs with unicode, 
-        // see e.g. the file in PDFBOX-3274
+
         Shape cyanShape = calculateGlyphBounds(textRenderingMatrix, font, code);
 
         if (cyanShape != null)
@@ -122,8 +111,6 @@ public class GetWordsAndPositions extends PDFTextStripper{
         if (font instanceof PDType3Font)
         {
             // It is difficult to calculate the real individual glyph bounds for type 3 fonts
-            // because these are not vector fonts, the content stream could contain almost anything
-            // that is found in page content streams.
             PDType3Font t3Font = (PDType3Font) font;
             PDType3CharProc charProc = t3Font.getCharProc(code);
             if (charProc != null)
@@ -165,8 +152,7 @@ public class GetWordsAndPositions extends PDFTextStripper{
         else if (font instanceof PDSimpleFont)
         {
             PDSimpleFont simpleFont = (PDSimpleFont) font;
-
-            // these two lines do not always work, e.g. for the TT fonts in file 032431.pdf
+            
             // which is why PDVectorFont is tried first.
             String name = simpleFont.getEncoding().getName(code);
             path = simpleFont.getPath(name);
@@ -198,25 +184,7 @@ public class GetWordsAndPositions extends PDFTextStripper{
         // page may be rotated
         rotateAT = new AffineTransform();
         int rotation = pdPage.getRotation();
-        if (rotation != 0)
-        {
-            PDRectangle mediaBox = pdPage.getMediaBox();
-            switch (rotation)
-            {
-                case 90:
-                    rotateAT.translate(mediaBox.getHeight(), 0);
-                    break;
-                case 270:
-                    rotateAT.translate(0, mediaBox.getWidth());
-                    break;
-                case 180:
-                    rotateAT.translate(mediaBox.getWidth(), mediaBox.getHeight());
-                    break;
-                default:
-                    break;
-            }
-            rotateAT.rotate(Math.toRadians(rotation));
-        }
+
 
         // cropbox
         transAT = AffineTransform.getTranslateInstance(-cropBox.getLowerLeftX(), cropBox.getLowerLeftY());
@@ -262,13 +230,16 @@ public class GetWordsAndPositions extends PDFTextStripper{
 	 */
 	@Override
 	protected void writeString(String str, List<TextPosition> textPositions) throws IOException {
-		//        String[] wordsInStream = str.split(getWordSeparator());
-		//        if(wordsInStream!=null){
-		//            for(String word :wordsInStream){
-		//
-		//                words.add(word);
-		//            }
-		//        }
+		 boolean isFound = false;
+	        float posXInit  = 0, 
+	              posXEnd   = 0, 
+	              posYInit  = 0,
+	              posYEnd   = 0,
+	              width     = 0, 
+	              height    = 0, 
+	              fontHeight = 0;	   
+	       
+		
 		String wordSeparator = getWordSeparator();
 		List<TextPosition> word = new ArrayList<>();
 		for (TextPosition text : textPositions) {
@@ -276,11 +247,25 @@ public class GetWordsAndPositions extends PDFTextStripper{
 			if (thisChar != null) {
 				if (thisChar.length() >= 1) {
 					if (!thisChar.equals(wordSeparator)) {
+						isFound = true;
 						word.add(text);
-					} else if (!word.isEmpty()) {
-						printWord(word);
-						word.clear();
-					}
+					} 
+					if (isFound) {
+			            posXInit = textPositions.get(0).getXDirAdj();
+			            posXEnd  = textPositions.get(textPositions.size() - 1).getXDirAdj() + textPositions.get(textPositions.size() - 1).getWidth();
+			            posYInit = textPositions.get(0).getPageHeight() - textPositions.get(0).getYDirAdj();
+			            posYEnd  = textPositions.get(0).getPageHeight() - textPositions.get(textPositions.size() - 1).getYDirAdj();
+			            width    = textPositions.get(0).getWidthDirAdj();
+			            height   = textPositions.get(0).getHeightDir();
+			          
+			            List<TextPosition> quadPoints = {posXInit, posYEnd + height + 2, posXEnd, posYEnd + height + 2, posXInit, posYInit - 2, posXEnd, posYEnd - 2};
+					
+			            printWord(quadPoints);
+//					else if (!word.isEmpty()) {
+//						
+//						printWord(word);
+//						word.clear();
+//					}
 				}
 			}
 		}
@@ -291,11 +276,7 @@ public class GetWordsAndPositions extends PDFTextStripper{
 	}
 
 	void printWord(List<TextPosition> word) throws IOException {
-//		File file=new File("src/test/resources/pdfFiles/DownloadBlob.pdf");
-//		
-//    	PDDocument document=PDDocument.load(file);    	
-//    	PDPage page = new PDPage();
-//          page=document.getPage(0);
+
 		Rectangle2D boundingBox = null;
 		StringBuilder builder = new StringBuilder();
 		for (TextPosition text : word) {
@@ -310,15 +291,11 @@ public class GetWordsAndPositions extends PDFTextStripper{
             AffineTransform at = text.getTextMatrix().createAffineTransform();
 
             // in red:
-            // show rectangles with the "height" (not a real height, but used for text extraction 
-            // heuristics, it is 1/2 of the bounding box height and starts at y=0)
             Rectangle2D.Float rect = new Rectangle2D.Float((float) boundingBox.getX(),(float) boundingBox.getY(),
             		(float)boundingBox.getHeight(),(float)boundingBox.getWidth()
             		);
            
-//    		Rectangle2D.Float rect = new Rectangle2D.Float(0, 0, 
-//                    text.getWidthDirAdj() / text.getTextMatrix().getScalingFactorX(),
-//                    text.getHeightDir() / text.getTextMatrix().getScalingFactorY());
+
             Shape s = at.createTransformedShape(rect);
             s = flipAT.createTransformedShape(s);
             s = rotateAT.createTransformedShape(s);
@@ -326,8 +303,6 @@ public class GetWordsAndPositions extends PDFTextStripper{
             g2d.draw(s);
 
             // in blue:
-            // show rectangle with the real vertical bounds, based on the font bounding box y values
-            // usually, the height is identical to what you see when marking text in Adobe Reader
             PDFont font = text.getFont();
             BoundingBox bbox = font.getBoundingBox();
 
@@ -358,7 +333,7 @@ public class GetWordsAndPositions extends PDFTextStripper{
 		mylogger.info(builder.toString() + " [(X=" + boundingBox.getX() + ",Y=" + boundingBox.getY()
 		+ ") height=" + boundingBox.getHeight() + " width=" + boundingBox.getWidth() + "]");
 	
-		//document.close(); 
+
 	}
 	
 	
