@@ -230,42 +230,81 @@ public class GetWordsAndPositions extends PDFTextStripper{
 	 */
 	@Override
 	protected void writeString(String str, List<TextPosition> textPositions) throws IOException {
-		 boolean isFound = false;
-	        float posXInit  = 0, 
-	              posXEnd   = 0, 
-	              posYInit  = 0,
-	              posYEnd   = 0,
-	              width     = 0, 
-	              height    = 0, 
-	              fontHeight = 0;	   
+//		 boolean isFound = false;
+//	     float posXInit  = 0, 
+//	       posXEnd   = 0, 
+//	              posYInit  = 0,
+//	              posYEnd   = 0,
+//	              width     = 0, 
+//	              height    = 0, 
+//	              fontHeight = 0;	   
 	       
+	     String token = "";
+	     int token_length = textPositions.size();
+	     int counter = 1;
+	     double minx = 0,maxx = 0,miny = 0,maxy =0; 
+	     double height = 0;
+	     double width = 0;
+	     int rotation = 0;
+
+	     for (TextPosition text : textPositions)
+	     {          
+	         rotation = text.getRotation();
+
+	         if (text.getHeight() > height)
+	             height = text.getHeight(); 
+
+	         if (text.getWidth() > width)
+	             width = text.getWidth();
+
+	         //if it is the first char of the current word
+	         if (counter == 1)
+	         {
+	             minx = text.getX();
+	             miny = text.getY();
+	         }
+
+	         //if it is the last char of the current word
+	         if (counter == token_length)
+	         {
+	             maxx = text.getEndX();
+	             maxy = text.getY();
+	         }
+
+	         token += text;
+	         counter += 1;
+
+	     }
+
+	     
 		
 		String wordSeparator = getWordSeparator();
+	
 		List<TextPosition> word = new ArrayList<>();
 		for (TextPosition text : textPositions) {
 			String thisChar = text.getUnicode();
 			if (thisChar != null) {
 				if (thisChar.length() >= 1) {
 					if (!thisChar.equals(wordSeparator)) {
-						isFound = true;
-						word.add(text);
-					} 
-					if (isFound) {
-			            posXInit = textPositions.get(0).getXDirAdj();
-			            posXEnd  = textPositions.get(textPositions.size() - 1).getXDirAdj() + textPositions.get(textPositions.size() - 1).getWidth();
-			            posYInit = textPositions.get(0).getPageHeight() - textPositions.get(0).getYDirAdj();
-			            posYEnd  = textPositions.get(0).getPageHeight() - textPositions.get(textPositions.size() - 1).getYDirAdj();
-			            width    = textPositions.get(0).getWidthDirAdj();
-			            height   = textPositions.get(0).getHeightDir();
-			          
-			            List<TextPosition> quadPoints = {posXInit, posYEnd + height + 2, posXEnd, posYEnd + height + 2, posXInit, posYInit - 2, posXEnd, posYEnd - 2};
+					//	isFound = true;
+						
+					word.add(text);
+//						word.add(text.getX());
+//						word.add(text.getYDirAdj());
+//						word.add(text.getWidthDirAdj());
+//						word.add(text.getHeightDir());
 					
-			            printWord(quadPoints);
-//					else if (!word.isEmpty()) {
-//						
-//						printWord(word);
-//						word.clear();
-//					}
+							
+						} 
+	          
+//			            List<TextPosition> quadPoints = {posXInit, posYEnd + height + 2, posXEnd, posYEnd + height + 2, posXInit, posYInit - 2, posXEnd, posYEnd - 2};
+//					
+//			            printWord(quadPoints);
+					else if (!word.isEmpty()) {
+						
+						printWord(word);
+						word.clear();
+					}
 				}
 			}
 		}
@@ -280,6 +319,7 @@ public class GetWordsAndPositions extends PDFTextStripper{
 		Rectangle2D boundingBox = null;
 		StringBuilder builder = new StringBuilder();
 		for (TextPosition text : word) {
+			
 			Rectangle2D box = new Rectangle2D.Float(text.getXDirAdj(), text.getYDirAdj(), text.getWidthDirAdj(), text.getHeightDir());
 			if (boundingBox == null)
 				boundingBox = box;

@@ -6,18 +6,19 @@ import java.io.File;
 
 import org.junit.Test;
 
-import pdfboxdemo.ParagraphCount;
+import pdfboxdemo.ParagraphExtract;
 
 public class ParagraphCountTest {
-	private ParagraphCount paragraphCount;
+	private ParagraphExtract paragraphExtract;
 	private String inputPath="src/test/resources/pdfFiles/DownloadBlob.pdf";
 	
 	@Test
 	public void test() {
-	paragraphCount=new ParagraphCount();
+	paragraphExtract=new ParagraphExtract();
 	File inputFile=new File(inputPath);
-	paragraphCount.checkFile(inputFile);
+	paragraphExtract.checkFile(inputFile);
 	assertTrue("Documnet does contain Paragraph",true);
 	}
 
+	
 }

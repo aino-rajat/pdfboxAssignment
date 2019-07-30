@@ -1,53 +1,142 @@
 package pdfboxdemo;
 
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.text.PDFTextStripper;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Scanner;
 
 public class ParagraphCount {
-	Logger mylogger=Logger.getLogger(this.getClass().getName());
-	public Boolean checkFile(File file) {
-		if (file == null || file.exists()==false) {
-			return false;
-		}
 
-		try {
-			PDDocument document=PDDocument.load(file);
-			int noOfpages=document.getNumberOfPages();		//Count the no. of pages in the doc.
-			mylogger.info(" Total no. of pages: " +noOfpages);
-			paragraphCount(file);
-			return true;
-		}	
-		catch (Exception e) {
-			mylogger.log(Level.INFO,"Exception occured while Character Count",e);
-		}
+	public static void main(String[] args) throws IOException {
 
-		return false;
-	}
-	private Boolean paragraphCount(File file) {
-		try {
-			int paragraphCount = 0; 
-			PDFTextStripper pdfStripper = new PDFTextStripper();
-			PDDocument doc = PDDocument.load(file);
-			String text = pdfStripper.getText(doc);
-			pdfStripper.setParagraphStart("/t");
-			pdfStripper.setSortByPosition(true);
-			for (String line: pdfStripper.getText(doc).split(pdfStripper.getParagraphStart()))
-            {
-				mylogger.log(Level.INFO, "Paragraph in Document:" +line);
-               
-            }
+	
+			
+			        try {
+			
+			            File file1 = new File("src\\test\\resources\\pdfFiles\\fileTest.txt");
+			
+			            File file2 = new File("src\\test\\resources\\pdfFiles\\data1.txt");
+			
+			             
+			
+			            Scanner sc = new Scanner(new FileReader(file1));
+			
+			 
+			
+			            PrintWriter output = new PrintWriter(new FileOutputStream(file2));
+			
+			            
+			
+			             
+			
+			 
+			
+			            int lineNum = 0;
+			
+			            int wordCount = 0;
+			
+			            int charCount = 0;
+			
+			            int paraCount = 0;
+			
+			 
+			
+			            while (sc.hasNextLine()) {
+			
+			                String line;
+			
+			                line = sc.nextLine();
+			
+			                lineNum++;
+			
+			
+			                charCount += line.length();
+			
+			                paraCount = getPara(line);
+			
+			 
+			
+			                if (!file2.exists()) {
+			
+			                    try {
+			
+			                        file2.createNewFile();
+			
+			                        output.print(line);
+			
+			                        output.flush();
+			
+			                    } catch (IOException e) {
+			
+			                        // TODO Auto-generated catch block
+			
+			                        e.printStackTrace();
+			
+			                    }
+			
+			                     
+			
+			                }
+			
+			            }
+			
+			             
+			
+			            System.out.println(lineNum + " lines");
+			
+			 
+			
+			            System.out.println(wordCount + " word(s)");
+			
+			 
+			
+			            System.out.println(charCount + " characters");
+			
+			 
+			
+			            System.out.println(paraCount);
+			
+			 
+			
+			            sc.close();
+			
+			            output.close();
+			
+			 
+			
+			            System.out.println("File Written");
+						        } catch (FileNotFoundException e) {
+			
+			            System.out.println("There was an error opening one of the files.");
+			
+			        }
+			
+			    }
+			
+			 
+			
+			    private static int getPara(String line) {
+			
+			        String[] str = line.split("\r\n");
+			
+			        int count = 0;
+			
+			        if(str.length > 1){
+			
+			            count++;
+			
+			             
+			
+			        }
+			
+			        return count;
+			
+			    }
+			
+			
 
-			return true;
-		} catch (Exception e) {
-			mylogger.log(Level.INFO, " Exception occured while :",e);
-		}
-		return false;
-	}
-
-}		
-
-
+	
+}
