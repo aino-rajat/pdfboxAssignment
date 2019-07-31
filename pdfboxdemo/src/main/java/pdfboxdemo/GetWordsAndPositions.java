@@ -239,42 +239,42 @@ public class GetWordsAndPositions extends PDFTextStripper{
 //	              height    = 0, 
 //	              fontHeight = 0;	   
 	       
-	     String token = "";
-	     int token_length = textPositions.size();
-	     int counter = 1;
-	     double minx = 0,maxx = 0,miny = 0,maxy =0; 
-	     double height = 0;
-	     double width = 0;
-	     int rotation = 0;
-
-	     for (TextPosition text : textPositions)
-	     {          
-	         rotation = text.getRotation();
-
-	         if (text.getHeight() > height)
-	             height = text.getHeight(); 
-
-	         if (text.getWidth() > width)
-	             width = text.getWidth();
-
-	         //if it is the first char of the current word
-	         if (counter == 1)
-	         {
-	             minx = text.getX();
-	             miny = text.getY();
-	         }
-
-	         //if it is the last char of the current word
-	         if (counter == token_length)
-	         {
-	             maxx = text.getEndX();
-	             maxy = text.getY();
-	         }
-
-	         token += text;
-	         counter += 1;
-
-	     }
+//	     String token = "";
+//	     int token_length = textPositions.size();
+//	     int counter = 1;
+//	     double minx = 0,maxx = 0,miny = 0,maxy =0; 
+//	     double height = 0;
+//	     double width = 0;
+//	     int rotation = 0;
+//
+//	     for (TextPosition text : textPositions)
+//	     {          
+//	         rotation = text.getRotation();
+//
+//	         if (text.getHeight() > height)
+//	             height = text.getHeight(); 
+//
+//	         if (text.getWidth() > width)
+//	             width = text.getWidth();
+//
+//	         //if it is the first char of the current word
+//	         if (counter == 1)
+//	         {
+//	             minx = text.getX();
+//	             miny = text.getY();
+//	         }
+//
+//	         //if it is the last char of the current word
+//	         if (counter == token_length)
+//	         {
+//	             maxx = text.getEndX();
+//	             maxy = text.getY();
+//	         }
+//
+//	         token += text;
+//	         counter += 1;
+//
+//	     }
 
 	     
 		

@@ -11,6 +11,8 @@ import pdfboxdemo.ParagraphExtract;
 public class ParagraphCountTest {
 	private ParagraphExtract paragraphExtract;
 	private String inputPath="src/test/resources/pdfFiles/DownloadBlob.pdf";
+		//demoAddingText.pdf";
+	//		+ "DownloadBlob.pdf";
 	
 	@Test
 	public void test() {

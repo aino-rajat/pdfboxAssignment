@@ -1,17 +1,26 @@
 package pdfboxdemo;
 
-import java.awt.geom.Rectangle2D;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.StringWriter;
+import java.util.List;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.pdfbox.io.RandomAccessRead;
+import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.apache.pdfbox.text.PDFTextStripperByArea;
+import org.apache.pdfbox.text.TextPosition;
 
-public class ParagraphExtract {
+public class ParagraphExtract extends PDFTextStripper {
+	public ParagraphExtract() throws IOException {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
 	Logger mylogger=Logger.getLogger(this.getClass().getName());
 	public Boolean checkFile(File file) {
 		if (file == null || file.exists()==false) {
@@ -23,7 +32,7 @@ public class ParagraphExtract {
 			int noOfpages=document.getNumberOfPages();		//Count the no. of pages in the doc.
 			mylogger.info(" Total no. of pages: " +noOfpages);
 			paragraphCount(file);
-			getPdfAsTextFromArea(file);
+			
 			return true;
 		}	
 		catch (Exception e) {
@@ -32,16 +41,26 @@ public class ParagraphExtract {
 
 		return false;
 	}
-	private Boolean paragraphCount(File file) {
+	private Boolean paragraphCount(File file) throws FileNotFoundException, IOException {
+		extractTextPosition(file);
 		try {
 			int paragraphCount = 0; 
-			PDFTextStripper pdfStripper = new PDFTextStripper();
+			 StringBuilder sb = new StringBuilder();
+			
 			PDDocument doc = PDDocument.load(file);
+			PDFTextStripper pdfStripper = new PDFTextStripper();
 			String text = pdfStripper.getText(doc);
+			
+		
 			pdfStripper.setParagraphStart("/t");
 			pdfStripper.setSortByPosition(true);
 			for (String line: pdfStripper.getText(doc).split(pdfStripper.getParagraphStart()))
-            {
+			{
+				 
+
+				//line.length();
+				mylogger.log(Level.INFO,"Paragraph length:" +line.length());
+				
 				mylogger.log(Level.INFO, "Paragraph in Document:" +line);
                
             }
@@ -52,26 +71,42 @@ public class ParagraphExtract {
 		}
 		return false;
 	}
-	public static String getPdfAsTextFromArea(File file) {
-		String text="";
-		try {
-			PDDocument doc = PDDocument.load(file);
-			PDFTextStripperByArea textStripper= new PDFTextStripperByArea();
-			textStripper.addRegion("region1",new Rectangle2D.Double(215,315,190,121));
-			textStripper.extractRegions(doc.getPage(0));
-			text=textStripper.getTextForRegion("region1");
-			doc.save("src/test/resources/pdfFiles/paragaroughCount.pdf");
-			doc.close();
-		} catch (InvalidPasswordException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return text;
 	
-	}
+	 private void extractTextPosition(File file) throws FileNotFoundException, IOException {
+		 PDDocument doc = PDDocument.load(file);
+		    PDFParser parser = new PDFParser((RandomAccessRead) file);
+		    parser.parse();
+		    StringWriter outString = new StringWriter();
+		    PDFTextStripper stripper = new ParagraphExtract();
+		    stripper.writeText(parser.getPDDocument(), outString);
+		    List<List<TextPosition>> vectorlistoftps = stripper.getArticleStart();
+		    for (int i = 0; i < vectorlistoftps.size(); i++) {
+		        List<TextPosition> tplist = vectorlistoftps.get(i);
+		        for (int j = 0; j < tplist.size(); j++) {
+		            TextPosition text = tplist.get(j);
+		            System.out.println(" String "
+		          + "[x: " + text.getXDirAdj() + ", y: "
+		          + text.getY() + ", height:" + text.getHeightDir()
+		          + ", space: " + text.getWidthOfSpace() + ", width: "
+		          + text.getWidthDirAdj() + ", yScale: " + text.getYScale() + "]");
+		          
+		        }       
+		    }
+//		    String[] lines = stripper.getText(doc).split(stripper.getParagraphStart());
+//		    for (int i = 0; i<lines.length; i++) {
+//		    	 Integer tplist =  lines.length;
+//		        for (int j = 0; j < tplist; j++) {
+//		            TextPosition text = tplist.toString();
+//		            System.out.println(" String "
+//		          + "[x: " + text.getXDirAdj() + ", y: "
+//		          + text.getY() + ", height:" + text.getHeightDir()
+//		          + ", space: " + text.getWidthOfSpace() + ", width: "
+//		          + text.getWidthDirAdj() + ", yScale: " + text.getYScale() + "]"
+//		          + text.getCharacter());
+//		        }       
+//		    }	
+	 }
+	
 
 }		
 
